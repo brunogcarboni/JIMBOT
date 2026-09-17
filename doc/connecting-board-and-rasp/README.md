@@ -8,29 +8,29 @@ Obs.: Please, use Linux.
     
 Install the network mapping tool 'nmap' by running:
     
-'''sh
+´´´sh
 sudo apt install nmap
-'''
+´´´
     
 After the installation, run the following command:
 
-'''sh
+´´sh
 ip -4 route | grep 'proto kernel
-'''
+´´
 
 Look for the DHCP's ip created by linux (usually 10.42.0.X/X) and then run:
 
-'''sh
+´´´shell
 sudo nmap -sn 10.42.0.X/X
-'''
+´´
 
 _Obs.: Replace X/X by the IP and range you found and it's corresponding range, if you didn't take the same aproach as we did and connected the Board to a router, the IP and range is usually 192.168.X.X/XX_
 
 Find the right device and it's IP and access the SSH by running:
     
-'''sh
+´´´shell
 ssh -o KexAlgorithms=+diffie-hellman-group14-sha1 -o HostKeyAlgorithms=+ssh-rsa root@10.42.0.X
-'''
+´´´
 
 > [!NOTE]
 > Because of the elder operating system Bitmain on the board, Linux has some troble connecting with the board.The flags '+diffie-hellman-group14-sha1' and '+ssh-rsa' are needed for a SSH connection.
@@ -40,9 +40,9 @@ After typing, the command line will ask for a password. The default password fof
     
 Once averything go well, you should see the following text in you terminal.
     
-'''sh
+´´´sh
 root@antMiner:~#
-'''
+´´´
     
 - Raspbarry Pi's SSH
 2. 
