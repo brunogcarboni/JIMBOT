@@ -4,7 +4,7 @@
 
 A caixa grande, a partir de `NEAR_ENTER` da largura do quadro, deixa o comando em `parado`, mesmo com a trena fora do centro. Abaixo de `NEAR_EXIT` a navegação volta: centro `reto`, direita `reto-direita`, esquerda `reto-esquerda`. Se a trena sai do quadro, o giro continua para o lado da saída (`buscando-esquerda` ou `buscando-direita`) até uma detecção nova. Sem histórico, o rótulo é `perdido`. Alguns frames vazios não disparam a busca.
 
-Os limiares, o índice da câmera e o score mínimo (`SCORE_MIN`) estão em `config.py`. O modelo é `model_best.ckpt` e a arquitetura é `trena.yml`, os dois nesta pasta.
+Os limiares, o índice da câmera e o score mínimo (`SCORE_MIN`) estão em `config.py`. A arquitetura é `trena.yml`, nesta pasta. O peso `model_best.ckpt` não entra no Git: o link para baixar está em `model_weight.txt`. Salve o arquivo baixado como `model_best.ckpt` aqui, ao lado do `main.py`, antes de rodar.
 
 ## Setup no Raspberry Pi 3
 
