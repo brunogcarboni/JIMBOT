@@ -1,0 +1,61 @@
+save_dir: workspace/trena_infer
+model:
+  arch:
+    name: NanoDetPlus
+    detach_epoch: 10
+    backbone:
+      name: ShuffleNetV2
+      model_size: 1.0x
+      out_stages: [2, 3, 4]
+      activation: LeakyReLU
+    fpn:
+      name: GhostPAN
+      in_channels: [116, 232, 464]
+      out_channels: 96
+      kernel_size: 5
+      num_extra_level: 1
+      use_depthwise: true
+      activation: LeakyReLU
+    head:
+      name: NanoDetPlusHead
+      num_classes: 1
+      input_channel: 96
+      feat_channels: 96
+      stacked_convs: 2
+      kernel_size: 5
+      strides: [8, 16, 32, 64]
+      activation: LeakyReLU
+      reg_max: 7
+      norm_cfg:
+        type: BN
+      loss:
+        loss_qfl:
+          name: QualityFocalLoss
+          use_sigmoid: true
+          beta: 2.0
+          loss_weight: 1.0
+        loss_dfl:
+          name: DistributionFocalLoss
+          loss_weight: 0.25
+        loss_bbox:
+          name: GIoULoss
+          loss_weight: 2.0
+    aux_head:
+      name: SimpleConvHead
+      num_classes: 1
+      input_channel: 192
+      feat_channels: 192
+      stacked_convs: 4
+      strides: [8, 16, 32, 64]
+      activation: LeakyReLU
+      reg_max: 7
+data:
+  val:
+    name: CocoDataset
+    img_path: images
+    ann_path: annotations.json
+    input_size: [320, 320]
+    keep_ratio: false
+    pipeline:
+      normalize: [[103.53, 116.28, 123.675], [57.375, 57.12, 58.395]]
+class_names: [trena]

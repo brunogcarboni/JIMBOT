@@ -1,0 +1,15 @@
+# Pacotes da inferência, depois do PyTorch.
+# O torch e o torchvision não ficam aqui: no Raspberry Pi 3 o wheel
+# padrão do PyPI usa instruções que o Cortex-A53 não tem. O README
+# de run/ instala torch==2.3.1 e torchvision==0.18.1 pelo índice CPU
+# antes deste arquivo. Não instale o requirements.txt do NanoDet:
+# ele pede torch<2 e troca o PyTorch que acabou de entrar.
+
+opencv-python>=4.8
+numpy>=1.24
+pytorch-lightning==1.9.5
+torchmetrics==0.11.4
+termcolor
+matplotlib
+pycocotools
+PyYAML
