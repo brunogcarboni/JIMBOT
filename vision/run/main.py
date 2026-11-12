@@ -1,5 +1,6 @@
 """Webcam: NanoDet localiza a trena e o terminal diz o rumo."""
 
+import argparse
 import time
 from pathlib import Path
 
@@ -8,11 +9,33 @@ import numpy as np
 
 import config
 from commander import Commander
-from infer import TapeDetector
+from infer import Int8TapeDetector, TapeDetector
 from tracker import Tracker
 
 
-def _draw(frame, state, command: str, fps: float):
+def _parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Rumo da trena pela webcam.")
+    parser.add_argument(
+        "--mode",
+        choices=("float", "int8"),
+        default="float",
+        help="float usa o checkpoint PyTorch. int8 usa o NCNN quantizado.",
+    )
+    return parser.parse_args()
+
+
+def _int8_files(here: Path) -> tuple[Path, Path]:
+    folders = [here, here.parent / "optimization" / "out"]
+    for folder in folders:
+        param = folder / config.INT8_PARAM
+        weights = folder / config.INT8_BIN
+        if param.is_file() and weights.is_file():
+            return param, weights
+    looked = ", ".join(str(folder) for folder in folders)
+    raise SystemExit(f"Não achei {config.INT8_PARAM} e {config.INT8_BIN} em {looked}.")
+
+
+def _draw(frame, state, command: str, fps: float, mode: str):
     view = frame.copy()
     if len(state.history) >= 2:
         trail = np.array(
@@ -31,7 +54,7 @@ def _draw(frame, state, command: str, fps: float):
         command,
         f"nx {nx_txt}  largura {width_txt}",
         f"parado acima de {config.NEAR_ENTER:.2f}",
-        f"fps {fps:.1f}",
+        f"fps {fps:.1f}  {mode}",
     ]
     y0 = 28
     for line in lines:
@@ -42,13 +65,17 @@ def _draw(frame, state, command: str, fps: float):
 
 
 def main() -> None:
+    args = _parse_args()
     here = Path(__file__).resolve().parent
-    model_path = here / config.MODEL_PATH
     config_path = here / config.CONFIG_PATH
-    if not model_path.exists():
-        raise SystemExit(f"Não achei o modelo em {model_path}")
-
-    detector = TapeDetector(model_path, config_path)
+    if args.mode == "int8":
+        param_path, bin_path = _int8_files(here)
+        detector = Int8TapeDetector(param_path, bin_path, config_path)
+    else:
+        model_path = here / config.MODEL_PATH
+        if not model_path.exists():
+            raise SystemExit(f"Não achei o modelo em {model_path}")
+        detector = TapeDetector(model_path, config_path)
     tracker = Tracker()
     commander = Commander()
 
@@ -76,7 +103,7 @@ def main() -> None:
             if dt > 0:
                 instant = 1.0 / dt
                 fps = instant if fps <= 0 else 0.9 * fps + 0.1 * instant
-            cv2.imshow("jimbot", _draw(frame, state, command, fps))
+            cv2.imshow("jimbot", _draw(frame, state, command, fps, args.mode))
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 break
     finally:

@@ -1,7 +1,10 @@
 .venv/
+.vscode/
 dataset/
 dataset.zip
 third_party/
 __pycache__/
 *.pyc
 *.ckpt
+optimization/out/
+ncnn/

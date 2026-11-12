@@ -6,6 +6,8 @@ FRAME_HEIGHT = 480
 
 MODEL_PATH = "model_best.ckpt"
 CONFIG_PATH = "trena.yml"
+INT8_PARAM = "trena-int8.param"
+INT8_BIN = "trena-int8.bin"
 SCORE_MIN = 0.5
 
 # nx = (cx - largura/2) / (largura/2). Dentro da zona, o rumo é reto.
