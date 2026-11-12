@@ -89,11 +89,11 @@ sudo apt update
 sudo apt install -y python3-venv python3-dev python3-opencv git cmake g++ libgl1 libglib2.0-0
 ```
 
-A partir da pasta `vision` do repositório, já copiada para a placa:
+A partir da pasta `vision` do repositório, já copiada para a placa, a venv fica em `run/`, de onde o `main.py` roda:
 
 ```bash
-python3 -m venv --system-site-packages .venv
-source .venv/bin/activate
+python3 -m venv --system-site-packages run/.venv
+source run/.venv/bin/activate
 python -m pip install --upgrade pip
 pip install numpy pyyaml
 ```
@@ -115,12 +115,12 @@ git checkout 24ea07e87f544a3fbc59980b57885a92c75f2d24
 cd ..
 ```
 
-No Pi não existem as flags AVX do PC. O build liga o binding Python na venv e usa um processo só, para o compilador não ser morto por falta de RAM:
+No Pi não existem as flags AVX do PC. As tools também ficam de fora: o conversor de Caffe pede o `protoc`, e a inferência não usa essas ferramentas. O CMake não executa o symlink `run/.venv/bin/python`; `readlink -f` entrega o interpretador do sistema em que essa venv se apoia (`/usr/bin/python3.13`). Um processo só evita o compilador morrer por falta de RAM. Rode a partir de `vision`:
 
 ```bash
 cmake -S ncnn -B ncnn/build -DCMAKE_BUILD_TYPE=Release -DNCNN_VULKAN=OFF \
-    -DNCNN_PYTHON=ON \
-    -DPython_EXECUTABLE="$PWD/.venv/bin/python" \
+    -DNCNN_BUILD_TOOLS=OFF -DNCNN_PYTHON=ON \
+    -DPython_EXECUTABLE="$(readlink -f run/.venv/bin/python)" \
     -DNCNN_BUILD_TESTS=OFF -DNCNN_BUILD_EXAMPLES=OFF \
     -DNCNN_BUILD_BENCHMARK=OFF
 cmake --build ncnn/build --target pyncnn -j1
