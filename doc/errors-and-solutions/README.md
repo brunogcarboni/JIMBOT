@@ -5,7 +5,7 @@
 2. Then:
     ```shell
     connect
-    targets -set -filter {name =^ "ARM*#0"}
+    targets -set -filter {name = "ARM*#0"}
     rst -processor
     ```
     
