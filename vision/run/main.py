@@ -1,5 +1,6 @@
 """Webcam: NanoDet localiza a trena e o terminal diz o rumo."""
 
+import time
 from pathlib import Path
 
 import cv2
@@ -11,7 +12,7 @@ from infer import TapeDetector
 from tracker import Tracker
 
 
-def _draw(frame, state, command: str):
+def _draw(frame, state, command: str, fps: float):
     view = frame.copy()
     if len(state.history) >= 2:
         trail = np.array(
@@ -30,6 +31,7 @@ def _draw(frame, state, command: str):
         command,
         f"nx {nx_txt}  largura {width_txt}",
         f"parado acima de {config.NEAR_ENTER:.2f}",
+        f"fps {fps:.1f}",
     ]
     y0 = 28
     for line in lines:
@@ -57,6 +59,8 @@ def main() -> None:
         raise SystemExit(f"Não abriu a webcam (índice {config.CAMERA_INDEX}).")
     print("q na janela encerra.", flush=True)
 
+    fps = 0.0
+    last = time.perf_counter()
     try:
         while True:
             ok, frame = cap.read()
@@ -66,7 +70,13 @@ def main() -> None:
             box = detector.detect(frame)
             state = tracker.update(box, frame.shape[1], frame.shape[0])
             command = commander.update(state)
-            cv2.imshow("jimbot", _draw(frame, state, command))
+            now = time.perf_counter()
+            dt = now - last
+            last = now
+            if dt > 0:
+                instant = 1.0 / dt
+                fps = instant if fps <= 0 else 0.9 * fps + 0.1 * instant
+            cv2.imshow("jimbot", _draw(frame, state, command, fps))
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 break
     finally:
