@@ -65,9 +65,9 @@ python optimization/quantize_ncnn.py --ncnn-dir ncnn --images get_data/dataset/i
 
 `--ncnn-dir` aponta para o clone quando `onnx2ncnn` não está no `PATH`. O script procura `ncnnoptimize`, `ncnn2table` e `ncnn2int8` em `ncnn/build/tools`.
 
-## Inferência int8 na Raspberry
+## Inferência na Raspberry
 
-O `run/main.py --mode int8` não usa PyTorch. Ele abre `trena-int8.param` e `trena-int8.bin`, procura primeiro em `run/` e depois em `optimization/out/`, e lê o pré-processamento de `run/trena.yml`. O modo padrão, `--mode float`, continua no `model_best.ckpt`.
+O `run/main.py --mode fp32` não usa PyTorch. Ele abre `trena-opt.param` e `trena-opt.bin`, procura primeiro em `run/` e depois em `optimization/out/`, e lê o pré-processamento de `run/trena.yml`. `--mode int8` faz o mesmo com `trena-int8.param` e `trena-int8.bin`. O modo padrão, `--mode float`, continua no `model_best.ckpt`.
 
 A placa desta seção é o Raspberry Pi 3, com Raspberry Pi OS de 64 bits. `uname -m` tem que imprimir `aarch64`.
 
@@ -136,19 +136,19 @@ python -c "import ncnn; print(ncnn.Net)"
 
 ### 3. Modelos e câmera
 
-Copie do PC os dois arquivos int8. Eles podem ficar em `run/` ou em `optimization/out/`:
+Copie do PC o par fp32 otimizado. Os dois arquivos podem ficar em `run/` ou em `optimization/out/`:
 
 ```bash
-scp trena-int8.param trena-int8.bin PI:vision/run/
+scp trena-opt.param trena-opt.bin PI:vision/run/
 ```
 
-`run/trena.yml` já vai com o repositório. Sem ele o detector int8 não lê a média, o desvio e o tamanho de entrada.
+`run/trena.yml` já vai com o repositório. Sem ele o detector não lê a média, o desvio e o tamanho de entrada.
 
 ```bash
 cd run
-python main.py --mode int8
+python main.py --mode fp32
 ```
 
-`q` na janela encerra. A legenda mostra `int8` ao lado do fps. A câmera USB costuma ser o índice 0 (`CAMERA_INDEX` em `run/config.py`).
+`q` na janela encerra. A legenda mostra `fp32` ao lado do fps. A câmera USB costuma ser o índice 0 (`CAMERA_INDEX` em `run/config.py`).
 
-Numa foto de teste no PC, o modo float marcou a trena com score 0,98 e o int8 marcou a mesma região com 0,44. O corte `SCORE_MIN` em `config.py` é 0,5, então esse quadro não vira caixa no modo int8. Se a câmera da placa repetir isso, baixe o `SCORE_MIN` só para essa inferência.
+No PC, esse fp32 reproduz o score do PyTorch. O int8, nas mesmas fotos, ficou com score médio 0,20 e não passou do corte `SCORE_MIN` 0,5, então `--mode int8` não desenha caixa.

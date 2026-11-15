@@ -154,15 +154,15 @@ def _decode_preds(
     return np.stack([x1, y1, x2, y2], axis=1), _sigmoid(cls_logits[:, 0])
 
 
-class Int8TapeDetector:
-    """NanoDet int8 no NCNN. A saída bruta é a mesma cabeça do modo float."""
+class NcnnTapeDetector:
+    """NanoDet no NCNN, fp32 ou int8. A saída bruta é a mesma cabeça do modo float."""
 
     def __init__(self, param_path: Path, bin_path: Path, config_path: Path) -> None:
         try:
             import ncnn
         except ImportError as exc:
             raise SystemExit(
-                "O modo int8 precisa do módulo Python do NCNN, compilado na mesma versão das tools."
+                "O NCNN precisa do módulo Python, compilado na mesma versão das tools."
             ) from exc
         if not hasattr(ncnn, "Net"):
             raise SystemExit(
@@ -212,7 +212,7 @@ class Int8TapeDetector:
             preds = preds.reshape(-1, self._channels)
         if preds.shape[0] != self._priors.shape[0]:
             raise SystemExit(
-                f"A saída int8 tem {preds.shape[0]} pontos e os priors têm {self._priors.shape[0]}."
+                f"A saída NCNN tem {preds.shape[0]} pontos e os priors têm {self._priors.shape[0]}."
             )
 
         boxes, scores = _decode_preds(

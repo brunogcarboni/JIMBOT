@@ -6,6 +6,8 @@ FRAME_HEIGHT = 480
 
 MODEL_PATH = "model_best.ckpt"
 CONFIG_PATH = "trena.yml"
+FP32_PARAM = "trena-opt.param"
+FP32_BIN = "trena-opt.bin"
 INT8_PARAM = "trena-int8.param"
 INT8_BIN = "trena-int8.bin"
 SCORE_MIN = 0.5
@@ -20,6 +22,6 @@ NEAR_EXIT = 0.28
 
 HISTORY = 50
 SMOOTH_N = 5
-LOST_AFTER = 6
+LOST_AFTER = 10
 EXIT_DX_PX = 12
 EXIT_EDGE_NX = 0.45
