@@ -27,6 +27,11 @@ def _parse_args() -> argparse.Namespace:
         action="store_true",
         help="Não abre a janela com o resultado.",
     )
+    parser.add_argument(
+        "--no-serial",
+        action="store_true",
+        help="Não abre a porta serial. O rumo só aparece no terminal.",
+    )
     return parser.parse_args()
 
 
@@ -144,18 +149,19 @@ def main() -> None:
             raise SystemExit(f"Não achei o modelo em {model_path}")
         detector = TapeDetector(model_path, config_path)
     tracker = Tracker()
-    commander = Commander()
-
-    camera = _LatestCapture(config.CAMERA_INDEX, config.FRAME_WIDTH, config.FRAME_HEIGHT)
-    if args.no_display:
-        print(f"fila da câmera: {camera.queue_size}. Ctrl+C encerra.", flush=True)
-    else:
-        print(f"fila da câmera: {camera.queue_size}. q na janela encerra.", flush=True)
-
-    fps = 0.0
-    last = time.perf_counter()
-    last_report = last
+    port = None if args.no_serial else config.SERIAL_PORT
+    commander = Commander(port=port)
+    camera = None
     try:
+        camera = _LatestCapture(config.CAMERA_INDEX, config.FRAME_WIDTH, config.FRAME_HEIGHT)
+        if args.no_display:
+            print(f"fila da câmera: {camera.queue_size}. Ctrl+C encerra.", flush=True)
+        else:
+            print(f"fila da câmera: {camera.queue_size}. q na janela encerra.", flush=True)
+
+        fps = 0.0
+        last = time.perf_counter()
+        last_report = last
         while True:
             ok, frame = camera.read()
             if not ok or frame is None:
@@ -179,7 +185,9 @@ def main() -> None:
             if cv2.waitKey(1) & 0xFF == ord("q"):
                 break
     finally:
-        camera.close()
+        if camera is not None:
+            camera.close()
+        commander.close()
         if not args.no_display:
             cv2.destroyAllWindows()
 

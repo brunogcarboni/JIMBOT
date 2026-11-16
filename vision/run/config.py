@@ -4,6 +4,9 @@ CAMERA_INDEX = 0
 FRAME_WIDTH = 640
 FRAME_HEIGHT = 480
 
+SERIAL_PORT = "/dev/serial0"
+SERIAL_BAUD = 115200
+
 MODEL_PATH = "model_best.ckpt"
 CONFIG_PATH = "trena.yml"
 FP32_PARAM = "trena-opt.param"

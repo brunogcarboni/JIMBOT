@@ -13,3 +13,4 @@ termcolor
 matplotlib
 pycocotools
 PyYAML
+pyserial
